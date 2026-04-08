@@ -7,12 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- 🔥 Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <!-- (Opcional, se for usar login futuramente) -->
-    <!-- <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script> -->
 </head>
 <body>
     <!-- Partículas de fundo -->
@@ -28,7 +22,7 @@
                 <h1>Lista de Vôlei</h1>
                 <p class="subtitle">Inscreva-se para jogar!</p>
             </div>
-
+            <!-- Status do horário -->
             <div class="status-horario" id="statusHorario">
                 <div class="status-icon">
                     <i class="fas fa-lock"></i>
@@ -38,14 +32,70 @@
                     <span class="status-detail">Abrem às 08:00</span>
                 </div>
             </div>
-
+            <!-- Relógio -->
             <div class="relogio" id="relogio">
                 <i class="fas fa-clock"></i>
                 <span id="horaAtual">--:--:--</span>
             </div>
         </header>
 
-        <!-- Formulário -->
+        <!-- Painel Admin (login) -->
+        <section class="admin-login-section" id="adminLoginSection">
+            <button class="btn-admin-toggle" id="btnAdminToggle">
+                <i class="fas fa-shield-alt"></i>
+                <span id="adminToggleText">��rea do Administrador</span>
+            </button>
+            <div class="admin-login-form" id="adminLoginForm" style="display: none;">
+                <div class="input-group-admin">
+                    <input 
+                        type="password" 
+                        id="senhaAdmin" 
+                        placeholder="Digite a senha de administrador"
+                        autocomplete="off"
+                    >
+                    <button type="button" id="btnLogin">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </div>
+                <div id="mensagemAdmin" class="mensagem"></div>
+            </div>
+            <!-- Admin logado -->
+            <div class="admin-logado" id="adminLogado" style="display: none;">
+                <div class="admin-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Modo Administrador Ativo</span>
+                </div>
+                <button class="btn-admin-logout" id="btnLogout">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </section>
+
+        <!-- Contagem regressiva (quando fechado) -->
+        <section class="countdown-section" id="countdownSection" style="display: none;">
+            <div class="countdown-card">
+                <h2><i class="fas fa-hourglass-half"></i> Inscrições abrem em</h2>
+                <div class="countdown-timer" id="countdownTimer">
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="countHoras">00</span>
+                        <span class="countdown-label">Horas</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="countMinutos">00</span>
+                        <span class="countdown-label">Minutos</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="countSegundos">00</span>
+                        <span class="countdown-label">Segundos</span>
+                    </div>
+                </div>
+                <p class="countdown-info">As inscrições abrem todos os dias às <strong>08:00</strong></p>
+            </div>
+        </section>
+
+        <!-- Formulário de Inscrição -->
         <section class="form-section" id="formSection">
             <div class="form-card">
                 <h2><i class="fas fa-user-plus"></i> Inscrição</h2>
@@ -68,8 +118,79 @@
             </div>
         </section>
 
-        <!-- Lista -->
+        <!-- Painel Admin (ações - só admin vê) -->
+        <section class="admin-panel" id="adminPanel" style="display: none;">
+            <div class="admin-card">
+                <h2><i class="fas fa-cogs"></i> Painel do Administrador</h2>
+                <div class="admin-actions-grid">
+                    <button class="btn-admin-action" id="btnAdminForcarAbrir">
+                        <i class="fas fa-lock-open"></i>
+                        <span>Forçar Abertura</span>
+                    </button>
+                    <button class="btn-admin-action" id="btnAdminForcarFechar">
+                        <i class="fas fa-lock"></i>
+                        <span>Forçar Fechamento</span>
+                    </button>
+                    <button class="btn-admin-action" id="btnAdminSortear">
+                        <i class="fas fa-random"></i>
+                        <span>Sortear Times</span>
+                    </button>
+                    <button class="btn-admin-action btn-admin-export" id="btnAdminExportar">
+                        <i class="fas fa-file-export"></i>
+                        <span>Exportar Lista</span>
+                    </button>
+                    <button class="btn-admin-action btn-admin-config" id="btnAdminConfig">
+                        <i class="fas fa-key"></i>
+                        <span>Alterar Senha</span>
+                    </button>
+                    <button class="btn-admin-action btn-admin-danger" id="btnAdminResetar">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Limpar Tudo</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Estatísticas -->
+        <section class="stats-section">
+            <div class="stat-card confirmados">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-number" id="totalConfirmados">0</span>
+                    <span class="stat-label">Confirmados</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill" id="barraConfirmados"></div>
+                </div>
+                <span class="stat-max">/ 28 vagas</span>
+            </div>
+            <div class="stat-card espera">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <span class="stat-number" id="totalEspera">0</span>
+                    <span class="stat-label">Em Espera</span>
+                </div>
+            </div>
+            <div class="stat-card desistencias">
+                <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-number" id="totalDesistencias">0</span>
+                    <span class="stat-label">Desistências</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Times -->
+        <section class="teams-section" id="teamsSection" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i> Divisão de Times
+            </h2>
+            <div class="teams-grid" id="teamsGrid"></div>
+        </section>
+
+        <!-- Listas -->
         <section class="lists-section">
+            <!-- Lista de Confirmados -->
             <div class="list-card">
                 <div class="list-header confirmados-header">
                     <h2>
@@ -78,32 +199,80 @@
                         <span class="badge" id="badgeConfirmados">0/28</span>
                     </h2>
                 </div>
-                <div class="list-body" id="listaConfirmados"></div>
+                <div class="list-body" id="listaConfirmados">
+                    <div class="empty-state">
+                        <i class="fas fa-volleyball-ball"></i>
+                        <p>Nenhum jogador inscrito ainda</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Espera -->
+            <div class="list-card">
+                <div class="list-header espera-header">
+                    <h2>
+                        <i class="fas fa-clock"></i> 
+                        Lista de Espera
+                        <span class="badge" id="badgeEspera">0</span>
+                    </h2>
+                </div>
+                <div class="list-body" id="listaEspera">
+                    <div class="empty-state">
+                        <i class="fas fa-hourglass-half"></i>
+                        <p>Nenhum jogador em espera</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Desistências -->
+            <div class="list-card">
+                <div class="list-header desistencias-header">
+                    <h2>
+                        <i class="fas fa-times-circle"></i> 
+                        Desistências
+                        <span class="badge" id="badgeDesistencias">0</span>
+                    </h2>
+                </div>
+                <div class="list-body" id="listaDesistencias">
+                    <div class="empty-state">
+                        <i class="fas fa-smile"></i>
+                        <p>Nenhuma desistência</p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Footer -->
         <footer class="footer">
             <p>🏐 Sistema de Lista de Vôlei &copy; 2024</p>
+            <p class="footer-info">Inscrições liberadas a partir das 08:00 | Gerenciamento exclusivo para administradores</p>
         </footer>
     </div>
 
-    <!-- 🔥 Inicialização do Firebase -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBXSZtVrG4l5nY7MIMc3Jnesxl7QUn4og4",
-            authDomain: "lista-de-volei-20h30.firebaseapp.com",
-            projectId: "lista-de-volei-20h30",
-            storageBucket: "lista-de-volei-20h30.firebasestorage.app",
-            messagingSenderId: "885404065182",
-            appId: "1:885404065182:web:7775b650a052b74e3fca8f"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-    </script>
+    <!-- Modal de Confirmação -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle" id="modalIcone"></i>
+            </div>
+            <h3 id="modalTitulo">Confirmar Ação</h3>
+            <p id="modalMensagem">Tem certeza?</p>
+            <!-- Input no modal (para alterar senha) -->
+            <div id="modalInputContainer" style="display:none;">
+                <input type="password" id="modalInput" class="modal-input" placeholder="">
+                <input type="password" id="modalInput2" class="modal-input" placeholder="" style="display:none; margin-top:10px;">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-modal btn-confirmar" id="btnModalConfirmar">
+                    <i class="fas fa-check"></i> Confirmar
+                </button>
+                <button class="btn-modal btn-cancelar" id="btnModalCancelar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
