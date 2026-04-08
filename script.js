@@ -1,6 +1,3 @@
-// ===== IMPORTAÇÕES FIREBASE =====
-import { getDatabase, ref, set, get, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
 // ===== SISTEMA DE LISTA DE VÔLEI COM ADMIN E CONTROLE DE HORÁRIO =====
 
 class VoleiListaSystem {
@@ -23,10 +20,6 @@ class VoleiListaSystem {
 
         // Modal
         this.modalCallback = null;
-
-        // Firebase
-        this.database = window.firebaseDatabase;
-        this.dbRef = ref(this.database, 'voleiLista');
 
         // Elementos do DOM
         this.cacheDom();
@@ -108,102 +101,35 @@ class VoleiListaSystem {
         this.criarToastContainer();
         this.bindEvents();
         this.iniciarRelogio();
-        this.iniciarSyncFirebase();
         this.renderAll();
         this.atualizarStatusHorario();
     }
 
     // ==========================================
-    //  FIREBASE - SYNC EM TEMPO REAL
+    //  PERSISTÊNCIA
     // ==========================================
-    iniciarSyncFirebase() {
-        // Escutar mudanças em tempo real
-        onValue(this.dbRef, (snapshot) => {
-            const dados = snapshot.val();
-            if (dados) {
-                this.confirmados = dados.confirmados || [];
-                this.espera = dados.espera || [];
-                this.desistencias = dados.desistencias || [];
-                this.senhaAdmin = dados.senhaAdmin || this.SENHA_PADRAO;
-                this.forcadoAberto = dados.forcadoAberto || false;
-                this.forcadoFechado = dados.forcadoFechado || false;
-                
-                // Atualizar interface
-                this.renderAll();
-                this.atualizarStatusHorario();
-            }
-        }, (error) => {
-            console.error('Erro ao sincronizar com Firebase:', error);
-            this.showToast('Erro de conexão com servidor', 'erro');
-        });
-    }
-
-    // ==========================================
-    //  PERSISTÊNCIA - FIREBASE
-    // ==========================================
-    async salvarDados() {
+    salvarDados() {
         const dados = {
             confirmados: this.confirmados,
             espera: this.espera,
             desistencias: this.desistencias,
             senhaAdmin: this.senhaAdmin,
             forcadoAberto: this.forcadoAberto,
-            forcadoFechado: this.forcadoFechado,
-            ultimaAtualizacao: Date.now()
+            forcadoFechado: this.forcadoFechado
         };
-
-        try {
-            await set(this.dbRef, dados);
-            // Também salvar no localStorage como backup
-            localStorage.setItem('voleiLista', JSON.stringify(dados));
-        } catch (error) {
-            console.error('Erro ao salvar no Firebase:', error);
-            this.showToast('Erro ao salvar dados', 'erro');
-            // Salvar pelo menos no localStorage
-            localStorage.setItem('voleiLista', JSON.stringify(dados));
-        }
+        localStorage.setItem('voleiLista', JSON.stringify(dados));
     }
 
-    async carregarDados() {
-        try {
-            const snapshot = await get(this.dbRef);
-            if (snapshot.exists()) {
-                const dados = snapshot.val();
-                this.confirmados = dados.confirmados || [];
-                this.espera = dados.espera || [];
-                this.desistencias = dados.desistencias || [];
-                this.senhaAdmin = dados.senhaAdmin || this.SENHA_PADRAO;
-                this.forcadoAberto = dados.forcadoAberto || false;
-                this.forcadoFechado = dados.forcadoFechado || false;
-            } else {
-                // Se não existir no Firebase, tentar carregar do localStorage
-                const dadosLocal = localStorage.getItem('voleiLista');
-                if (dadosLocal) {
-                    const parsed = JSON.parse(dadosLocal);
-                    this.confirmados = parsed.confirmados || [];
-                    this.espera = parsed.espera || [];
-                    this.desistencias = parsed.desistencias || [];
-                    this.senhaAdmin = parsed.senhaAdmin || this.SENHA_PADRAO;
-                    this.forcadoAberto = parsed.forcadoAberto || false;
-                    this.forcadoFechado = parsed.forcadoFechado || false;
-                    
-                    // Sincronizar com Firebase
-                    await this.salvarDados();
-                }
-            }
-        } catch (error) {
-            console.error('Erro ao carregar do Firebase:', error);
-            // Fallback para localStorage
-            const dadosLocal = localStorage.getItem('voleiLista');
-            if (dadosLocal) {
-                const parsed = JSON.parse(dadosLocal);
-                this.confirmados = parsed.confirmados || [];
-                this.espera = parsed.espera || [];
-                this.desistencias = parsed.desistencias || [];
-                this.senhaAdmin = parsed.senhaAdmin || this.SENHA_PADRAO;
-                this.forcadoAberto = parsed.forcadoAberto || false;
-                this.forcadoFechado = parsed.forcadoFechado || false;
-            }
+    carregarDados() {
+        const dados = localStorage.getItem('voleiLista');
+        if (dados) {
+            const parsed = JSON.parse(dados);
+            this.confirmados = parsed.confirmados || [];
+            this.espera = parsed.espera || [];
+            this.desistencias = parsed.desistencias || [];
+            this.senhaAdmin = parsed.senhaAdmin || this.SENHA_PADRAO;
+            this.forcadoAberto = parsed.forcadoAberto || false;
+            this.forcadoFechado = parsed.forcadoFechado || false;
         }
     }
 
