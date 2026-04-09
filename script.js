@@ -13,7 +13,7 @@ import {
 
 // V9: Sua configuração do Firebase que você forneceu
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY", // SUBSTITUA PELA SUA CHAVE REGENERADA
+  apiKey: "AIzaSyBXSZtVrG4l5nY7MIMc3Jnesxl7QUn4og4", // SUBSTITUA PELA SUA CHAVE REGENERADA
   authDomain: "lista-de-volei-20h30.firebaseapp.com",
   projectId: "lista-de-volei-20h30",
   databaseURL: "https://lista-de-volei-20h30-default-rtdb.firebaseio.com", // Adicione esta linha se não estiver lá
